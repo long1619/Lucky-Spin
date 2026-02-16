@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Snake 3D - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00d2ff;
+            --neon-pink: #ff007f;
+            --neon-green: #39ff14;
+            --dark: #050510;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .score-board {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 40px;
+            border-radius: 50px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        .game-area {
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 800px;
+        }
+
+        #snakeCanvas {
+            background: rgba(10, 10, 30, 0.8);
+            border: 4px solid var(--neon-blue);
+            box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
+            border-radius: 10px;
+            transform: rotateX(20deg);
+            /* 3D Perspective effect */
+            display: block;
+        }
+
+        .controls-hint {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            display: flex;
+            gap: 20px;
+        }
+
+        .hint-key {
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            color: var(--neon-pink);
+            font-weight: 700;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateZ(100px);
+            /* Lift above 3D plane */
+            background: rgba(5, 5, 20, 0.95);
+            padding: 40px 60px;
+            border-radius: 20px;
+            text-align: center;
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 40px rgba(255, 0, 127, 0.4);
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-restart {
+            margin-top: 25px;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, var(--neon-blue), #00a8cc);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-restart:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 210, 255, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="score-board">SCORE: <span id="score">00</span></div>
+    </div>
+
+    <div class="game-area">
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <div class="game-over" id="gameOver">
+            <h2 style="color: var(--neon-pink)">GAME OVER</h2>
+            <p id="finalScore" style="margin: 10px 0">Score: 0</p>
+            <button class="btn-restart" onclick="resetGame()">CHƠI LẠI</button>
+        </div>
+    </div>
+
+    <div class="controls-hint">
+        <div>Dùng <span class="hint-key">Phím Mũi Tên</span> hoặc <span class="hint-key">WASD</span> để điều khiển</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const gameOverEl = document.getElementById('gameOver');
+        const finalScoreEl = document.getElementById('finalScore');
+
+        const box = 20;
+        let score = 0;
+        let snake = [];
+        let food = {};
+        let d = "RIGHT";
+        let game;
+
+        function init() {
+            snake = [];
+            snake[0] = { x: 9 * box, y: 10 * box };
+            score = 0;
+            scoreEl.textContent = "00";
+            d = "RIGHT";
+            food = spawnFood();
+            gameOverEl.style.display = "none";
+            if (game) clearInterval(game);
+            game = setInterval(draw, 120);
+        }
+
+        function spawnFood() {
+            return {
+                x: Math.floor(Math.random() * 19 + 1) * box,
+                y: Math.floor(Math.random() * 19 + 1) * box
+            };
+        }
+
+        document.addEventListener("keydown", direction);
+
+        function direction(event) {
+            let key = event.keyCode;
+            if ((key == 37 || key == 65) && d != "RIGHT") d = "LEFT";
+            else if ((key == 38 || key == 87) && d != "DOWN") d = "UP";
+            else if ((key == 39 || key == 68) && d != "LEFT") d = "RIGHT";
+            else if ((key == 40 || key == 83) && d != "UP") d = "DOWN";
+        }
+
+        function draw() {
+            // Background grid
+            ctx.fillStyle = "rgba(10, 10, 30, 0.5)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid lines
+            ctx.strokeStyle = "rgba(0, 210, 255, 0.05)";
+            for (let i = 0; i < canvas.width; i += box) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+            }
+
+            // Draw Snake
+            for (let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i == 0) ? "#00d2ff" : "#00a8cc";
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#00d2ff";
+
+                // 3D effect: draw main body
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+
+                // Highlights
+                ctx.fillStyle = "rgba(255,255,255,0.2)";
+                ctx.fillRect(snake[i].x, snake[i].y, box, 4);
+
+                ctx.shadowBlur = 0;
+            }
+
+            // Draw Food
+            ctx.fillStyle = "#ff007f";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#ff007f";
+            ctx.beginPath();
+            ctx.arc(food.x + box / 2, food.y + box / 2, box / 2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            if (d == "LEFT") snakeX -= box;
+            if (d == "UP") snakeY -= box;
+            if (d == "RIGHT") snakeX += box;
+            if (d == "DOWN") snakeY += box;
+
+            // Check Collision
+            if (snakeX == food.x && snakeY == food.y) {
+                score++;
+                scoreEl.textContent = score < 10 ? "0" + score : score;
+                food = spawnFood();
+            } else {
+                snake.pop();
+            }
+
+            let newHead = { x: snakeX, y: snakeY };
+
+            if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
+                clearInterval(game);
+                finalScoreEl.textContent = "Score: " + score;
+                gameOverEl.style.display = "block";
+            }
+
+            snake.unshift(newHead);
+        }
+
+        function collision(head, array) {
+            for (let i = 0; i < array.length; i++) {
+                if (head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            init();
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

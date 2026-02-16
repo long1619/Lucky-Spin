@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nối Số Nhanh - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4cc9f0, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .target-box {
+            background: var(--glass);
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        #currentTarget {
+            color: var(--success);
+            font-size: 2rem;
+            margin-left: 10px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .num-btn {
+            aspect-ratio: 1;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .num-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .num-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .num-btn.correct {
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .num-btn.wrong {
+            background: var(--secondary);
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .stats {
+            margin-top: 30px;
+            display: flex;
+            gap: 40px;
+            font-weight: 600;
+        }
+
+        .btn-restart {
+            margin-top: 30px;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-home {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>NỐI SỐ NHANH</h1>
+        <p style="color: rgba(255,255,255,0.6)">Bấm các số theo thứ tự từ nhỏ đến lớn!</p>
+    </div>
+
+    <div class="target-box">
+        Tìm số: <span id="currentTarget">1</span>
+    </div>
+
+    <div class="game-grid" id="grid"></div>
+
+    <div class="stats">
+        <span>Thời gian: <span id="time">0.00</span>s</span>
+        <span>Kỷ lục: <span id="best">--</span></span>
+    </div>
+
+    <button id="restartBtn" class="btn-restart" onclick="initGame()">BẮT ĐẦU</button>
+
+    <a href="index.html" class="btn-home">
+        <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
+    </a>
+
+    <script>
+        let currentNum = 1;
+        let timer = null;
+        let startTime = null;
+        let totalNums = 25;
+        let gameActive = false;
+
+        const gridEl = document.getElementById('grid');
+        const targetEl = document.getElementById('currentTarget');
+        const timeEl = document.getElementById('time');
+        const bestEl = document.getElementById('best');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Load best score
+        const savedBest = localStorage.getItem('numLinkBest');
+        if (savedBest) bestEl.textContent = savedBest;
+
+        function initGame() {
+            currentNum = 1;
+            gameActive = true;
+            targetEl.textContent = '1';
+            timeEl.textContent = '0.00';
+            restartBtn.style.display = 'none';
+
+            const nums = [];
+            for (let i = 1; i <= totalNums; i++) nums.push(i);
+            nums.sort(() => Math.random() - 0.5);
+
+            gridEl.innerHTML = '';
+            nums.forEach(n => {
+                const btn = document.createElement('button');
+                btn.className = 'num-btn';
+                btn.textContent = n;
+                btn.onclick = () => handleNumClick(n, btn);
+                gridEl.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timer = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                timeEl.textContent = elapsed.toFixed(2);
+            }, 10);
+        }
+
+        function handleNumClick(num, btn) {
+            if (!gameActive) return;
+
+            if (num === currentNum) {
+                btn.classList.add('correct');
+                currentNum++;
+                if (currentNum > totalNums) {
+                    winGame();
+                } else {
+                    targetEl.textContent = currentNum;
+                }
+            } else {
+                btn.classList.add('wrong');
+                setTimeout(() => btn.classList.remove('wrong'), 300);
+            }
+        }
+
+        function winGame() {
+            gameActive = false;
+            clearInterval(timer);
+            const finalTime = timeEl.textContent;
+
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            // Handle highscore
+            const savedBest = localStorage.getItem('numLinkBest');
+            if (!savedBest || parseFloat(finalTime) < parseFloat(savedBest)) {
+                localStorage.setItem('numLinkBest', finalTime);
+                bestEl.textContent = finalTime;
+                alert(`TUYỆT VỜI! Kỷ lục mới: ${finalTime}s!`);
+            } else {
+                alert(`Hoàn thành trong ${finalTime}s!`);
+            }
+
+            restartBtn.style.display = 'inline-block';
+            restartBtn.textContent = 'CHƠI LẠI';
+        }
+    </script>
+</body>
+
+</html>

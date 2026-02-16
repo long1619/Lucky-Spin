@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tìm Từ Bí Ẩn - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4cc9f0, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .game-wrapper {
+            display: flex;
+            gap: 40px;
+            max-width: 900px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .grid-container {
+            background: var(--glass);
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            user-select: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 5px;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cell:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .cell.selected {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .cell.found {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .word-list {
+            background: var(--glass);
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            min-width: 250px;
+        }
+
+        .word-list h3 {
+            margin-bottom: 20px;
+            color: var(--success);
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .word-item {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s;
+        }
+
+        .word-item.found {
+            text-decoration: line-through;
+            color: var(--success);
+            opacity: 0.7;
+        }
+
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn-restart {
+            padding: 12px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-home {
+            margin-top: 20px;
+            display: block;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+        }
+
+        @media (max-width: 700px) {
+            .grid {
+                grid-template-columns: repeat(10, 32px);
+                grid-template-rows: repeat(10, 32px);
+            }
+
+            .cell {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>TÌM TỪ BÍ ẨN</h1>
+        <p style="color: rgba(255,255,255,0.6)">Tìm danh sách các từ ẩn giấu trong ô chữ!</p>
+    </div>
+
+    <div class="game-wrapper">
+        <div class="grid-container">
+            <div class="grid" id="grid"></div>
+        </div>
+
+        <div class="word-list">
+            <h3>DANH SÁCH TỪ</h3>
+            <div id="wordList"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-restart" onclick="initGame()">LÀM MỚI</button>
+        <a href="index.html" class="btn-home">
+            <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
+        </a>
+    </div>
+
+    <script>
+        const words = ['LUCKY', 'SPIN', 'GAME', 'WIN', 'MAGIC', 'WHEEL', 'GOLD', 'HAPPY'];
+        const size = 10;
+        let grid = [];
+        let foundWords = [];
+        let selectedCells = [];
+
+        const gridEl = document.getElementById('grid');
+        const wordListEl = document.getElementById('wordList');
+
+        function initGame() {
+            grid = Array(size).fill().map(() => Array(size).fill(''));
+            foundWords = [];
+            selectedCells = [];
+            gridEl.innerHTML = '';
+            wordListEl.innerHTML = '';
+
+            // Place words
+            words.forEach(word => {
+                placeWord(word);
+                const item = document.createElement('div');
+                item.className = 'word-item';
+                item.id = `word-${word}`;
+                item.textContent = word;
+                wordListEl.appendChild(item);
+            });
+
+            // Fill empty
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    if (grid[r][c] === '') {
+                        grid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+                    }
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.textContent = grid[r][c];
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    cell.onclick = () => handleCellClick(r, c, cell);
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        function placeWord(word) {
+            let placed = false;
+            while (!placed) {
+                const dir = Math.random() > 0.5 ? 'H' : 'V';
+                const row = Math.floor(Math.random() * size);
+                const col = Math.floor(Math.random() * size);
+
+                if (dir === 'H' && col + word.length <= size) {
+                    let fits = true;
+                    for (let i = 0; i < word.length; i++) {
+                        if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) fits = false;
+                    }
+                    if (fits) {
+                        for (let i = 0; i < word.length; i++) grid[row][col + i] = word[i];
+                        placed = true;
+                    }
+                } else if (dir === 'V' && row + word.length <= size) {
+                    let fits = true;
+                    for (let i = 0; i < word.length; i++) {
+                        if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) fits = false;
+                    }
+                    if (fits) {
+                        for (let i = 0; i < word.length; i++) grid[row + i][col] = word[i];
+                        placed = true;
+                    }
+                }
+            }
+        }
+
+        function handleCellClick(r, c, cell) {
+            if (cell.classList.contains('found')) return;
+
+            if (cell.classList.contains('selected')) {
+                cell.classList.remove('selected');
+                selectedCells = selectedCells.filter(pos => pos.r !== r || pos.c !== c);
+            } else {
+                cell.classList.add('selected');
+                selectedCells.push({ r, c, char: grid[r][c] });
+                checkSelection();
+            }
+        }
+
+        function checkSelection() {
+            // Check if selected cells form a word
+            const currentStr = selectedCells.map(p => p.char).join('');
+            const reversedStr = currentStr.split('').reverse().join('');
+
+            words.forEach(word => {
+                if ((currentStr === word || reversedStr === word) && !foundWords.includes(word)) {
+                    markFound(word);
+                }
+            });
+        }
+
+        function markFound(word) {
+            foundWords.push(word);
+            document.getElementById(`word-${word}`).classList.add('found');
+
+            selectedCells.forEach(pos => {
+                const cell = Array.from(document.querySelectorAll('.cell')).find(
+                    c => c.dataset.r == pos.r && c.dataset.c == pos.c
+                );
+                cell.classList.remove('selected');
+                cell.classList.add('found');
+            });
+            selectedCells = [];
+
+            if (foundWords.length === words.length) {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                alert('CHÚC MỪNG! Bạn đã tìm thấy tất cả các từ!');
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+
+</html>

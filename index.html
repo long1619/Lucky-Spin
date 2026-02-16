@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vòng Quay May Mắn - Premium</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/more-tools.css">
+
+    <style>
+        /* ─── BASE STYLES (FROM INDEX.HTML) ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Premium Dark Background */
+            background: radial-gradient(ellipse at 50% 0%, #2a0a6e 0%, #0D0428 60%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Allow vertical scroll */
+            position: relative;
+        }
+
+        /* ─── STARS BACKGROUND ─── */
+        .stars {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, white, transparent),
+                radial-gradient(1px 1px at 30% 60%, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(1.5px 1.5px at 60% 15%, white, transparent),
+                radial-gradient(1px 1px at 80% 40%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(1px 1px at 55% 75%, white, transparent),
+                radial-gradient(1.5px 1.5px at 25% 85%, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(1px 1px at 90% 90%, white, transparent),
+                radial-gradient(1px 1px at 45% 45%, rgba(255, 255, 255, 0.5), transparent),
+                radial-gradient(1px 1px at 72% 33%, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(1.5px 1.5px at 18% 50%, white, transparent),
+                radial-gradient(1px 1px at 85% 70%, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(1px 1px at 5% 80%, rgba(255, 255, 255, 0.5), transparent),
+                radial-gradient(1px 1px at 40% 10%, white, transparent),
+                radial-gradient(1.5px 1.5px at 95% 15%, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(1px 1px at 63% 88%, rgba(255, 255, 255, 0.6), transparent);
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            from {
+                opacity: 0.6;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ─── LANTERNS ─── */
+        .lantern {
+            position: fixed;
+            animation: lanternFloat linear infinite;
+            pointer-events: none;
+            z-index: 2;
+            filter: drop-shadow(0 0 10px rgba(255, 165, 0, 0.6));
+        }
+
+        @keyframes lanternFloat {
+            0% {
+                transform: translateY(110vh) rotate(-10deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-20vh) rotate(10deg);
+                opacity: 0;
+            }
+        }
+
+        /* ─── CANVAS PARTICLE ─── */
+        #particleCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ─── WHEEL APP STYLES (MERGED) ─── */
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            /* More opacity for readability */
+            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            --shadow-bold: 0 20px 60px -15px rgba(0, 0, 0, 0.3);
+            --radius-lg: 32px;
+            --radius-md: 20px;
+            --glass-border: rgba(255, 255, 255, 0.4);
+        }
+
+        .main-wrapper {
+            position: relative;
+            z-index: 10;
+            /* Above particles */
+            padding-bottom: 50px;
+        }
+
+        /* Header */
+        .heading-title {
+            font-weight: 900;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FFD700 50%, #4facfe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.2rem;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Pills & Nav */
+        .mode-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            gap: 10px;
+        }
+
+        .mode-pills {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 8px;
+            border-radius: 100px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mode-pill {
+            padding: 8px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .mode-pills {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                width: 100%;
+                gap: 8px;
+            }
+
+            .mode-pill {
+                width: 100%;
+                font-size: 0.85rem;
+                padding: 8px 4px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                justify-content: center;
+            }
+
+            .mode-pill i {
+                margin-right: 4px !important;
+            }
+        }
+
+        .btn-check:checked+.mode-pill {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .mode-pill:hover:not(.btn-check:checked + .mode-pill) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Wheel */
+        .wheel-box {
+            position: relative;
+            padding: 20px;
+        }
+
+        .wheel-outer {
+            position: relative;
+            width: min(500px, 90vw);
+            height: min(500px, 90vw);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            padding: 15px;
+            box-shadow: 0 0 50px rgba(79, 70, 229, 0.4);
+            transition: transform 0.3s ease;
+        }
+
+        .wheel-outer:hover {
+            transform: scale(1.02);
+        }
+
+        .canvas-holder {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
+        }
+
+        .wheel-indicator {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 60px;
+            background: #ffc107;
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 20;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .wheel-center-decoration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 50%;
+            z-index: 11;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            padding: 5px;
+        }
+
+        #spin-btn {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Sidebar Cards */
+        .config-card,
+        .info-card,
+        .history-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-bold);
+            color: var(--text-dark);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .card-title {
+            color: var(--text-dark);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .prize-display {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .prize-display li {
+            background: #f8fafc;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border-radius: 12px;
+            border-left: 4px solid #ccc;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #333;
+        }
+
+        #custom-entries {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            color: #333;
+        }
+
+        /* Confetti */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            top: 50%;
+            left: 50%;
+            border-radius: 4px;
+            animation: confettiBurst 1.5s ease-out forwards;
+        }
+
+        @keyframes confettiBurst {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--x), var(--y)) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Duck Race */
+        .duck-race-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .race-track {
+            background: #e0f2fe;
+            border-radius: 15px;
+            padding: 10px;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .duck-lane {
+            position: relative;
+            height: 60px;
+            border-bottom: 2px dashed rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .duck-entity {
+            position: absolute;
+            font-size: 2.5rem;
+            transition: left 0.1s linear;
+            top: -10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .duck-name {
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: -5px;
+        }
+
+        .finish-line {
+            position: absolute;
+            right: 20px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            background: repeating-linear-gradient(to bottom, #000 0, #000 10px, #fff 10px, #fff 20px);
+            z-index: 5;
+        }
+
+        /* Controls */
+        .custom-select-premium {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+        .custom-select-premium option {
+            color: #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .wheel-outer {
+                width: 90vw;
+                height: 90vw;
+            }
+
+            .main-content {
+                flex-direction: column;
+            }
+
+            .info-sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Stars Background -->
+    <div class="stars"></div>
+    <!-- Particle Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Floating Lanterns -->
+    <div class="lantern" style="left:5%;  animation-duration:12s; animation-delay:0s;  font-size:1.5rem;">🏮</div>
+    <div class="lantern" style="left:92%; animation-duration:15s; animation-delay:3s;  font-size:1.8rem;">🏮</div>
+    <div class="lantern" style="left:15%; animation-duration:18s; animation-delay:7s;  font-size:1.2rem;">🏮</div>
+    <div class="lantern" style="left:80%; animation-duration:13s; animation-delay:11s; font-size:1.4rem;">🏮</div>
+    <div class="lantern" style="left:48%; animation-duration:16s; animation-delay:5s;  font-size:1.6rem;">🏮</div>
+    <div class="lantern" style="left:30%; animation-duration:20s; animation-delay:9s;  font-size:1.3rem;">🏮</div>
+
+    <!-- Confetti Container -->
+    <div id="confetti-container"></div>
+
+    <!-- MAIN APP CONTENT -->
+    <div class="main-wrapper">
+        <div class="container pt-4 pb-5">
+            <header class="text-center mb-5">
+                <h1 class="heading-title">VÒNG QUAY MAY MẮN</h1>
+                <p class="subtitle">Thử vận may - Nhận quà ngay</p>
+
+                <!-- Mode Selector -->
+                <nav class="mode-nav mt-3">
+                    <div class="mode-pills">
+                        <input type="radio" class="btn-check" name="wheel-mode" id="mode-reward" checked>
+                        <label class="mode-pill" for="mode-reward"><i class="fas fa-gift me-2"></i>Quà Tặng</label>
+
+
+
+                        <input type="radio" class="btn-check" name="wheel-mode" id="mode-numbers">
+                        <label class="mode-pill" for="mode-numbers"><i class="fas fa-hashtag me-2"></i>Con số may
+                            mắn</label>
+
+                        <input type="radio" class="btn-check" name="wheel-mode" id="mode-lixi">
+                        <label class="mode-pill" for="mode-lixi"><i class="fas fa-envelope-open-text me-2"></i>Lì
+                            Xì</label>
+
+                        <input type="radio" class="btn-check" name="wheel-mode" id="mode-duck">
+                        <label class="mode-pill" for="mode-duck"><i class="fas fa-kiwi-bird me-2"></i>Đua Vịt</label>
+
+                        <input type="radio" class="btn-check" name="wheel-mode" id="mode-custom">
+                        <label class="mode-pill" for="mode-custom"><i class="fas fa-edit me-2"></i>Tùy Chỉnh</label>
+                    </div>
+
+                    <!-- Music Control -->
+                    <div id="music-selector-container" class="mt-3 d-none">
+                        <div class="d-flex align-items-center justify-content-center gap-2">
+                            <select id="music-select" class="form-select form-select-sm w-auto custom-select-premium">
+                                <option value="mp3/Nhac-Chuong-xo-so-mien-bac.mp3">Xổ số miền Bắc</option>
+                                <option value="mp3/Nhac-so-xo-remix.mp3">Xổ số Remix</option>
+                                <option value="mp3/Nhac-tet.mp3">Nhạc Tết</option>
+                            </select>
+                            <button id="mute-btn" class="btn btn-sm btn-light rounded-circle"><i
+                                    class="fas fa-volume-up"></i></button>
+                            <input type="range" id="volume-slider" class="form-range" style="width: 80px;" min="0"
+                                max="1" step="0.1" value="1">
+                        </div>
+                    </div>
+                </nav>
+            </header>
+
+            <div class="row g-4 main-content align-items-start justify-content-center">
+                <!-- Wheel / Game Section -->
+                <div class="col-lg-7 d-flex justify-content-center">
+                    <!-- Wheel Container -->
+                    <div id="wheel-container" class="wheel-box">
+                        <div class="wheel-outer">
+                            <div class="wheel-indicator"></div>
+                            <div class="canvas-holder">
+                                <canvas id="wheel" width="500" height="500"></canvas>
+                            </div>
+                            <div class="wheel-center-decoration">
+                                <button id="spin-btn">QUAY</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duck Race Container (Hidden by default) -->
+                    <div id="duck-race-container" class="duck-race-box d-none w-100">
+                        <div class="race-track">
+                            <div class="finish-line"></div>
+                            <div id="duck-lane-container" class="duck-lanes">
+                                <!-- Ducks generated here -->
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button id="start-race-btn"
+                                class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow">BẮT ĐẦU ĐUA 🏁</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Section -->
+                <div class="col-lg-5">
+                    <aside class="info-sidebar d-flex flex-column gap-3">
+                        <!-- Config Panel -->
+                        <div id="config-panel" class="config-card">
+                            <h3 class="card-title"><i class="fas fa-cog me-2"></i>Cài Đặt</h3>
+                            <textarea id="custom-entries" class="form-control mb-3" rows="5"
+                                placeholder="Nhập tên giải thưởng (mỗi dòng 1 cái)..."></textarea>
+                            <button id="update-custom-btn" class="btn btn-primary w-100 fw-bold">Cập Nhật</button>
+                        </div>
+
+                        <!-- List Panel -->
+                        <div class="info-card">
+                            <h3 class="card-title"><i class="fas fa-list me-2"></i>Danh Sách</h3>
+                            <ul class="prize-display list-unstyled" id="prize-list"></ul>
+                        </div>
+
+                        <!-- History Panel -->
+                        <div class="history-card">
+                            <h3 class="card-title"><i class="fas fa-history me-2"></i>Lịch Sử</h3>
+                            <div id="history-log" class="history-list">
+                                <p class="text-muted small empty-state">Chưa có lượt quay nào.</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- MORE TOOLS SECTION -->
+            <div class="row more-tools-section">
+                <div class="col-12 col-lg-10 mx-auto">
+                    <div class="more-tools-container">
+                        <div class="tools-header">
+                            <h3><i class="fas fa-toolbox me-2"></i>Công cụ hay khác</h3>
+                        </div>
+                        <div class="tools-list">
+                            <!-- Tool 1: Xem Lịch Âm -->
+                            <a href="calendar.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/traditional-vietnamese-new-year-calendar_23-2148786576.jpg"
+                                        alt="Lịch Âm">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Xem lịch âm hôm nay</div>
+                                    <p class="tool-desc">Công cụ xem lịch âm chuẩn nhất, giao diện trực quan, dữ liệu
+                                        đầy đủ. Tra cứu ngũ hành, giờ hoàng đạo nhanh chóng.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 2: Đếm Ngược -->
+                            <a href="countdown.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/flat-tet-background_23-2149258498.jpg"
+                                        alt="Đếm Ngược">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Đếm ngược Tết Nguyên Đán 2026</div>
+                                    <p class="tool-desc">Công cụ đếm ngược thời gian chính xác từng giây đến Tết Bính
+                                        Ngọ 2026. Cùng chờ đón khoảnh khắc giao thừa thiêng liêng.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 3: Bầu Cua 3D -->
+                            <a href="baucua.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/lunar-new-year-concept-with-decorations_23-2148786504.jpg"
+                                        alt="Bầu Cua 3D">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Bầu Cua 3D Luxe</div>
+                                    <p class="tool-desc">Trò chơi dân gian Việt Nam với giao diện 3D hiện đại, hiệu ứng
+                                        xúc xắc xoay sống động. Thử vận may đầu năm ngay!</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 4: Rắn Săn Mồi -->
+                            <a href="snake.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/neon-grid-background_52683-46132.jpg"
+                                        alt="Rắn Săn Mồi">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Neon Snake 3D</div>
+                                    <p class="tool-desc">Đỉnh cao game rắn săn mồi với phong cách Neon huyền ảo và hiệu
+                                        ứng 3D Perspective. Chinh phục điểm số cao nhất.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 5: Cờ Caro -->
+                            <a href="caro.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/abstract-blue-geometric-grid-background_53876-116401.jpg"
+                                        alt="Cờ Caro">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Caro Master</div>
+                                    <p class="tool-desc">Trò chơi trí tuệ kịch tính trên bàn cờ 15x15. Đối đầu trực
+                                        tiếp,
+                                        thể hiện tư duy chiến thuật đỉnh cao của bạn.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 6: Kéo Búa Bao -->
+                            <a href="keobuabao.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/flat-hand-drawn-rock-paper-scissors-illustration_23-2148924876.jpg"
+                                        alt="Kéo Búa Bao">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Siêu Cấp Oẳn Tù Tì</div>
+                                    <p class="tool-desc">Trò chơi kéo búa bao kinh điển với phong cách hiện đại. Đối đầu
+                                        với AI thông minh và xem ai là người chiến thắng.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 7: Ném Đá -->
+                            <a href="nemda.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/game-landscape-with-mountains-clouds-field-sun-vector-illustration-background-nature-concept_1142-10243.jpg"
+                                        alt="Ném Đá">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Đại Chiến Ném Đá</div>
+                                    <p class="tool-desc">Tái hiện tuổi thơ với trò chơi ném đá kịch tính. Hỗ trợ đấu với
+                                        máy hoặc so tài cùng bạn bè trên cùng máy tính.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 8: Đoán Số -->
+                            <a href="doanso.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/abstract-bright-background-with-numbers_23-2148332464.jpg"
+                                        alt="Đoán Số">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Đoán Số May Mắn</div>
+                                    <p class="tool-desc">Thử thách khả năng suy luận với trò chơi đoán số bí ẩn. Bạn có
+                                        thể tìm ra con số bí ẩn trong bao nhiêu lượt?</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 9: Đoán Chữ -->
+                            <a href="doanchu.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/modern-scrabble-concept-with-wooden-tiles_23-2148411985.jpg"
+                                        alt="Đoán Chữ">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Đoán Chữ Kinh Điển</div>
+                                    <p class="tool-desc">Trò chơi Hangman với giao diện hiện đại. Mở rộng vốn từ vựng
+                                        của bạn qua nhiều chủ đề hấp dẫn.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 10: Đoán Hình -->
+                            <a href="doanhinh.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/flat-photography-concept-design_23-2148534125.jpg"
+                                        alt="Đoán Hình">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Đoán Hình Qua Ảnh</div>
+                                    <p class="tool-desc">Hình ảnh bị che khuất đang chờ bạn khám phá. Hãy vận dụng trí
+                                        tưởng tượng để đưa ra câu trả lời đúng.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 11: Nối Chữ -->
+                            <a href="noichu.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/gradient-connection-concept-background_23-2148378393.jpg"
+                                        alt="Nối Chữ">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Đại Chiến Nối Chữ</div>
+                                    <p class="tool-desc">Trò chơi nối chữ tiếng Việt đối đầu với AI. Thách thức khả năng
+                                        sử dụng ngôn từ linh hoạt của bạn.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 12: Nối Hình -->
+                            <a href="noihinh.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/flat-matching-game-concept_23-2148301149.jpg"
+                                        alt="Nối Hình">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Nối Hình Cặp Đôi</div>
+                                    <p class="tool-desc">Rèn luyện trí nhớ với trò chơi lật hình tìm cặp giống nhau.
+                                        Giao diện sắc nét, hiệu ứng mượt mà.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 13: Nối Số -->
+                            <a href="noiso.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/futuristic-technology-connection-background_23-2148366113.jpg"
+                                        alt="Nối Số">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Siêu Tốc Nối Số</div>
+                                    <p class="tool-desc">Bấm các số theo thứ tự nhanh nhất có thể. Cạnh tranh kỷ lục
+                                        thời gian cùng bạn bè.</p>
+                                </div>
+                            </a>
+
+                            <!-- Tool 14: Tìm Từ -->
+                            <a href="timtu.html" target="_blank" class="tool-item">
+                                <div class="tool-thumb">
+                                    <img src="https://img.freepik.com/free-vector/lettering-word-search-concept_23-2148639019.jpg"
+                                        alt="Tìm Từ">
+                                </div>
+                                <div class="tool-info">
+                                    <div class="tool-title">Truy Tìm Từ Ẩn</div>
+                                    <p class="tool-desc">Tìm kiếm các từ vựng ẩn giấu trong ma trận chữ cái. Trò chơi
+                                        giúp rèn luyện khả năng quan sát nhạy bén.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END MORE TOOLS SECTION -->
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal fade" id="winModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg"
+                style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                <div class="modal-body text-center p-5">
+                    <div style="font-size: 4rem;">🎉</div>
+                    <h2 class="text-danger fw-bold my-3">CHÚC MỪNG!</h2>
+                    <p class="text-muted">Kết quả:</p>
+                    <h3 id="prize-name" class="fw-bolder text-primary mb-4 display-6">---</h3>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-success py-2 rounded-pill" data-bs-dismiss="modal">TUYỆT
+                            VỜI</button>
+                        <button type="button" id="remove-winner-btn" class="btn btn-outline-danger py-2 rounded-pill">
+                            <i class="fas fa-trash-alt me-2"></i>Xóa mục này khỏi danh sách
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Files -->
+    <audio id="spinSound" src="https://assets.mixkit.co/active_storage/sfx/2005/2005-preview.mp3"
+        preload="auto"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
+    <audio id="tetMusic" src="mp3/Nhac-tet.mp3" preload="auto" loop></audio>
+    <audio id="xosoMusic" src="mp3/Nhac-Chuong-xo-so-mien-bac.mp3" preload="auto" loop></audio>
+    <audio id="duckSound" src="https://assets.mixkit.co/active_storage/sfx/2855/2855-preview.mp3"
+        preload="auto"></audio>
+    <audio id="duckMusic" src="https://www.mboxdrive.com/DuckRaceMusic.mp3" preload="auto" loop></audio>
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- APP LOGIC -->
+    <script>
+        // --- PARTICLE BACKGROUND SYSTEM (EXISTING) ---
+        const pCanvas = document.getElementById('particleCanvas');
+        const pCtx = pCanvas.getContext('2d');
+
+        function resize() {
+            pCanvas.width = window.innerWidth;
+            pCanvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        function lighten(hex, amt) {
+            const n = parseInt(hex.replace('#', ''), 16);
+            const r = Math.min(255, Math.max(0, (n >> 16) + amt));
+            const g = Math.min(255, Math.max(0, ((n >> 8) & 0xff) + amt));
+            const b = Math.min(255, Math.max(0, (n & 0xff) + amt));
+            return `rgb(${r},${g},${b})`;
+        }
+
+        function drawCherryBlossom(ctx, size, color) {
+            for (let i = 0; i < 5; i++) {
+                ctx.save();
+                ctx.rotate((i / 5) * Math.PI * 2);
+                ctx.beginPath();
+                ctx.ellipse(0, -size * 0.5, size * 0.28, size * 0.5, 0, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.restore();
+            }
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.18, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFD700';
+            ctx.fill();
+        }
+
+        function drawStar(ctx, size, color) {
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const outer = (i * 4 * Math.PI / 5) - Math.PI / 2;
+                const inner = outer + 2 * Math.PI / 5;
+                i === 0 ? ctx.moveTo(Math.cos(outer) * size, Math.sin(outer) * size) :
+                    ctx.lineTo(Math.cos(outer) * size, Math.sin(outer) * size);
+                ctx.lineTo(Math.cos(inner) * size * 0.4, Math.sin(inner) * size * 0.4);
+            }
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawHeart(ctx, size, color) {
+            ctx.beginPath();
+            ctx.moveTo(0, size * 0.3);
+            ctx.bezierCurveTo(-size, -size * 0.2, -size, -size * 0.8, 0, -size * 0.3);
+            ctx.bezierCurveTo(size, -size * 0.8, size, -size * 0.2, 0, size * 0.3);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        const FLOWER_PALETTE = ['#FF6B9D', '#FFD700', '#FF9ECD', '#FFC0CB', '#FF85A1', '#FFECF0', '#B389FF', '#87CEEB', '#FFFFFF'];
+        class Flower {
+            constructor(initial = false) { this.reset(initial); }
+            reset(initial = false) {
+                this.x = Math.random() * pCanvas.width;
+                this.y = initial ? Math.random() * -pCanvas.height : -30;
+                this.size = 8 + Math.random() * 18;
+                this.speed = 0.6 + Math.random() * 2;
+                this.drift = (Math.random() - 0.5) * 1.4;
+                this.rot = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.04;
+                this.opacity = 0.55 + Math.random() * 0.45;
+                this.type = Math.floor(Math.random() * 3);
+                this.sway = Math.random() * Math.PI * 2;
+                this.color = FLOWER_PALETTE[Math.floor(Math.random() * FLOWER_PALETTE.length)];
+            }
+            update() {
+                this.y += this.speed;
+                this.sway += 0.018;
+                this.x += Math.sin(this.sway) * 0.9 + this.drift;
+                this.rot += this.rotSpeed;
+                if (this.y > pCanvas.height + 40) this.reset();
+            }
+            draw() {
+                pCtx.save();
+                pCtx.translate(this.x, this.y);
+                pCtx.rotate(this.rot);
+                pCtx.globalAlpha = this.opacity;
+                if (this.type === 0) drawCherryBlossom(pCtx, this.size, this.color);
+                else if (this.type === 1) drawStar(pCtx, this.size * 0.7, this.color);
+                else drawHeart(pCtx, this.size * 0.6, this.color);
+                pCtx.restore();
+            }
+        }
+
+        const BALLOON_COLORS = ['#FF6B9D', '#FFD700', '#9B59B6', '#3498DB', '#1ABC9C', '#F39C12', '#E74C3C', '#FF9ECD', '#87CEEB'];
+        class Balloon {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * pCanvas.width;
+                this.y = pCanvas.height + 60 + Math.random() * 100;
+                this.size = 22 + Math.random() * 28;
+                this.speed = 1.0 + Math.random() * 1.8;
+                this.drift = (Math.random() - 0.5) * 0.8;
+                this.sway = Math.random() * Math.PI * 2;
+                this.color = BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)];
+            }
+            update() {
+                this.y -= this.speed;
+                this.sway += 0.022;
+                this.x += Math.sin(this.sway) * 1.1 + this.drift;
+                if (this.y < -110) this.reset();
+            }
+            draw() {
+                pCtx.save();
+                pCtx.translate(this.x, this.y);
+                pCtx.beginPath();
+                pCtx.moveTo(0, this.size * 0.95);
+                pCtx.quadraticCurveTo(7, this.size * 1.5, 0, this.size * 2.2);
+                pCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+                pCtx.lineWidth = 1.5;
+                pCtx.stroke();
+                const grad = pCtx.createRadialGradient(-this.size * 0.3, -this.size * 0.3, 0, 0, 0, this.size * 0.95);
+                grad.addColorStop(0, lighten(this.color, 100));
+                grad.addColorStop(0.4, this.color);
+                grad.addColorStop(1, lighten(this.color, -50));
+                pCtx.beginPath();
+                pCtx.ellipse(0, 0, this.size * 0.76, this.size * 0.95, 0, 0, Math.PI * 2);
+                pCtx.fillStyle = grad;
+                pCtx.fill();
+                pCtx.beginPath();
+                pCtx.ellipse(-this.size * 0.24, -this.size * 0.30, this.size * 0.20, this.size * 0.13, -0.5, 0, Math.PI * 2);
+                pCtx.fillStyle = 'rgba(255,255,255,0.60)';
+                pCtx.fill();
+                pCtx.beginPath();
+                pCtx.arc(0, this.size * 0.9, 4, 0, Math.PI * 2);
+                pCtx.fillStyle = lighten(this.color, -50);
+                pCtx.fill();
+                pCtx.restore();
+            }
+        }
+
+        let particles = [];
+        for (let i = 0; i < 45; i++) particles.push(new Flower(true));
+        for (let i = 0; i < 12; i++) particles.push(new Balloon());
+
+        (function loop() {
+            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(loop);
+        })();
+
+        setInterval(() => {
+            const f = particles.filter(p => p instanceof Flower).length;
+            const b = particles.filter(p => p instanceof Balloon).length;
+            if (f < 40) particles.push(new Flower());
+            if (b < 10) particles.push(new Balloon());
+        }, 350);
+
+
+        // --- WHEEL / GAME LOGIC ---
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spin-btn');
+        const spinSound = document.getElementById('spinSound');
+        const winSound = document.getElementById('winSound');
+        const prizeNameDisplay = document.getElementById('prize-name');
+        const historyLog = document.getElementById('history-log');
+        const prizeListUI = document.getElementById('prize-list');
+        const configPanel = document.getElementById('config-panel');
+        const customEntriesText = document.getElementById('custom-entries');
+        const updateCustomBtn = document.getElementById('update-custom-btn');
+        const modeRadios = document.querySelectorAll('input[name="wheel-mode"]');
+
+        const wheelContainer = document.getElementById('wheel-container');
+        const duckRaceContainer = document.getElementById('duck-race-container');
+        const duckLaneContainer = document.getElementById('duck-lane-container');
+        const startRaceBtn = document.getElementById('start-race-btn');
+        const duckSound = document.getElementById('duckSound');
+        const duckMusic = document.getElementById('duckMusic');
+
+        const musicSelectorContainer = document.getElementById('music-selector-container');
+        const musicSelect = document.getElementById('music-select');
+        const tetMusic = document.getElementById('tetMusic');
+        const xosoMusic = document.getElementById('xosoMusic');
+        const volumeSlider = document.getElementById('volume-slider');
+        const muteBtn = document.getElementById('mute-btn');
+        const allAudio = document.querySelectorAll('audio');
+
+        let lastWinnerIndex = -1;
+        let winModalObj = null;
+        let currentVolume = 1;
+        let isMuted = false;
+
+        const palette = [
+            '#6366f1', '#f43f5e', '#10b981', '#f59e0b',
+            '#0ea5e9', '#8b5cf6', '#ec4899', '#14b8a6'
+        ];
+
+        const wheelConfigs = {
+            'mode-reward': [
+                { name: "iPhone 15", color: '#4f46e5', icon: "📱" },
+                { name: "Macbook Air", color: '#0ea5e9', icon: "💻" },
+                { name: "Voucher 1TR", color: '#10b981', icon: "🎟️" },
+                { name: "AirPods Pro", color: '#8b5cf6', icon: "🎧" },
+                { name: "Chúc May Mắn", color: '#64748b', icon: "🍀" },
+                { name: "Thanh Toán 0đ", color: '#f43f5e', icon: "✨" },
+                { name: "Lì Xì 500k", color: '#f59e0b', icon: "🧧" },
+                { name: "Thẻ Cào 100k", color: '#ec4899', icon: "💳" }
+            ],
+
+            'mode-numbers': Array.from({ length: 12 }, (_, i) => ({
+                name: `Số ${i + 1}`,
+                color: palette[i % palette.length],
+                icon: "🔢"
+            })),
+            'mode-lixi': [
+                { name: "10k", color: '#f43f5e', icon: "🧧" },
+                { name: "20k", color: '#f59e0b', icon: "🧧" },
+                { name: "50k", color: '#10b981', icon: "🧧" },
+                { name: "100k", color: '#4f46e5', icon: "🧧" },
+                { name: "200k", color: '#8b5cf6', icon: "🧧" },
+                { name: "500k", color: '#ec4899', icon: "🧧" }
+            ],
+            'mode-duck': [
+                { name: "Vịt Vàng", color: '#f59e0b', icon: "🦆" },
+                { name: "Vịt Xanh", color: '#0ea5e9', icon: "🦆" },
+                { name: "Vịt Đỏ", color: '#f43f5e', icon: "🦆" },
+                { name: "Vịt Tím", color: '#8b5cf6', icon: "🦆" }
+            ],
+            'mode-custom': [
+                { name: "Lựa chọn 1", color: palette[0], icon: "✏️" },
+                { name: "Lựa chọn 2", color: palette[1], icon: "✏️" },
+                { name: "Lựa chọn 3", color: palette[2], icon: "✏️" }
+            ]
+        };
+
+        let currentMode = 'mode-reward';
+        let currentPrizes = [...wheelConfigs[currentMode]];
+        let currentRotation = 0;
+        let isSpinning = false;
+        let isRacing = false;
+
+        function initPrizeList() {
+            prizeListUI.innerHTML = currentPrizes.map((p) => `
+        <li style="border-left-color: ${p.color}">
+            <span class="me-3">${p.icon}</span>
+            <span>${p.name}</span>
+        </li>
+    `).join('');
+            customEntriesText.value = currentPrizes.map(p => p.name).join('\n');
+            if (currentMode === 'mode-duck') renderDuckLanes();
+        }
+
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = centerX - 5;
+            const totalPrizes = currentPrizes.length;
+            const arc = (Math.PI * 2) / totalPrizes;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            currentPrizes.forEach((prize, i) => {
+                const angle = i * arc;
+                ctx.save();
+                ctx.beginPath();
+                ctx.fillStyle = prize.color;
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, angle, angle + arc);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                const fontSize = totalPrizes > 15 ? 12 : 16;
+                ctx.font = `800 ${fontSize}px 'Plus Jakarta Sans', sans-serif`;
+                ctx.fillText(prize.name, radius - 40, 6);
+                ctx.restore();
+            });
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(255,255,255,0.5)";
+            ctx.fill();
+        }
+
+        function renderDuckLanes() {
+            duckLaneContainer.innerHTML = currentPrizes.map((p, i) => `
+        <div class="duck-lane">
+            <div class="duck-entity" id="duck-${i}" style="left: 0;">
+                <span class="duck-sprite">🦆</span>
+                <span class="duck-name">${p.name}</span>
+            </div>
+        </div>
+    `).join('');
+        }
+
+        function startRace() {
+            if (isRacing) return;
+            isRacing = true;
+            startRaceBtn.disabled = true;
+
+            duckMusic.currentTime = 0;
+            duckMusic.play().catch(() => { });
+            duckSound.play().catch(() => { });
+
+            const totalDistance = duckRaceContainer.offsetWidth - 120;
+            const avgSpeed = totalDistance / 300; // Roughly 300 steps of 50ms = 15s
+            const ducks = currentPrizes.map((_, i) => ({
+                element: document.getElementById(`duck-${i}`),
+                position: 0,
+                speed: avgSpeed * (0.7 + Math.random() * 0.6),
+                finished: false
+            }));
+
+            const raceInterval = setInterval(() => {
+                let winnerFound = false;
+                ducks.forEach(duck => {
+                    if (!duck.finished) {
+                        duck.speed += (Math.random() - 0.5) * 0.2;
+                        if (duck.speed < 0.2) duck.speed = 0.2;
+                        if (duck.speed > avgSpeed * 3) duck.speed = avgSpeed * 3;
+                        duck.position += duck.speed;
+                        duck.element.style.left = `${duck.position}px`;
+
+                        if (duck.position >= totalDistance) {
+                            duck.finished = true;
+                            if (!winnerFound) {
+                                winnerFound = true;
+                                clearInterval(raceInterval);
+                                finishRace(ducks.indexOf(duck));
+                            }
+                        }
+                    }
+                });
+            }, 50);
+        }
+
+        function finishRace(winnerIndex) {
+            isRacing = false;
+            startRaceBtn.disabled = false;
+            duckMusic.pause();
+            winSound.currentTime = 0;
+            winSound.play().catch(() => { });
+            const winner = currentPrizes[winnerIndex];
+            lastWinnerIndex = winnerIndex;
+            showResult(winner);
+        }
+
+        function spin() {
+            if (currentMode === 'mode-duck') {
+                startRace();
+                return;
+            }
+            if (isSpinning || currentPrizes.length === 0) return;
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+
+            let activeSpinSound = spinSound;
+            if (['mode-numbers', 'mode-lixi'].includes(currentMode)) {
+                activeSpinSound = xosoMusic;
+            }
+
+            activeSpinSound.currentTime = 0;
+            activeSpinSound.play().catch(() => { });
+
+            const rounds = 7 + Math.floor(Math.random() * 5);
+            const extraDegrees = Math.floor(Math.random() * 360);
+            const totalRotation = currentRotation + (rounds * 360) + extraDegrees;
+
+            currentRotation = totalRotation;
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                // Do not pause if it's the background music player
+                if (activeSpinSound !== xosoMusic) {
+                    activeSpinSound.pause();
+                }
+                winSound.currentTime = 0;
+                winSound.play().catch(() => { });
+                determinePrize(totalRotation);
+            }, 5000);
+        }
+
+        function determinePrize(totalRotation) {
+            const totalPrizes = currentPrizes.length;
+            const normalized = (270 - (totalRotation % 360) + 360) % 360;
+            const index = Math.floor(normalized / (360 / totalPrizes));
+            lastWinnerIndex = index;
+            showResult(currentPrizes[index]);
+        }
+
+        function showResult(prize) {
+            prizeNameDisplay.textContent = prize.name;
+            prizeNameDisplay.style.color = prize.color;
+            if (!winModalObj) winModalObj = new bootstrap.Modal(document.getElementById('winModal'));
+            winModalObj.show();
+            createConfetti(prize.color);
+
+            if (historyLog.querySelector('.empty-state')) historyLog.innerHTML = '';
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.style.padding = '5px 0';
+            div.style.borderBottom = '1px solid #eee';
+            div.innerHTML = `<span><i class="fas fa-star text-warning"></i> <strong>${prize.name}</strong></span> <small class="text-muted float-end">${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</small>`;
+            historyLog.prepend(div);
+        }
+
+        function createConfetti(prizeColor) {
+            const container = document.getElementById('confetti-container');
+            container.innerHTML = '';
+            const colors = [prizeColor, '#ffd700', '#ff6b6b', '#4facfe', '#43e97b', '#fa709a'];
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                const angle = (Math.PI * 2 * i) / 50;
+                const velocity = 200 + Math.random() * 200;
+                confetti.style.setProperty('--x', `${Math.cos(angle) * velocity}px`);
+                confetti.style.setProperty('--y', `${Math.sin(angle) * velocity}px`);
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 0.1}s`;
+                container.appendChild(confetti);
+            }
+            setTimeout(() => { container.innerHTML = ''; }, 2000);
+        }
+
+        function stopAllMusic() {
+            tetMusic.pause(); xosoMusic.pause(); duckMusic.pause();
+            tetMusic.currentTime = 0; xosoMusic.currentTime = 0; duckMusic.currentTime = 0;
+        }
+
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                currentMode = e.target.id;
+                currentPrizes = [...wheelConfigs[currentMode]];
+                stopAllMusic();
+
+                musicSelectorContainer.classList.add('d-none');
+
+                if (['mode-lixi', 'mode-numbers'].includes(currentMode)) {
+                    musicSelectorContainer.classList.remove('d-none');
+
+                    if (currentMode === 'mode-lixi') {
+                        if (musicSelect.value !== 'mp3/Nhac-tet.mp3') {
+                            musicSelect.value = 'mp3/Nhac-tet.mp3';
+                        }
+                    } else {
+                        if (musicSelect.value === 'mp3/Nhac-tet.mp3') {
+                            musicSelect.value = 'mp3/Nhac-Chuong-xo-so-mien-bac.mp3';
+                        }
+                    }
+
+                    xosoMusic.src = musicSelect.value;
+                    xosoMusic.play().catch(() => { });
+                }
+
+                if (currentMode === 'mode-duck') {
+                    wheelContainer.classList.add('d-none');
+                    duckRaceContainer.classList.remove('d-none');
+                    renderDuckLanes(); // Reset ducks when entering mode
+                } else {
+                    wheelContainer.classList.remove('d-none');
+                    duckRaceContainer.classList.add('d-none');
+                    resetWheelPosition();
+                }
+                initPrizeList();
+            });
+        });
+
+        // Reset ducks when win modal is closed in duck mode
+        document.getElementById('winModal').addEventListener('hidden.bs.modal', function () {
+            if (currentMode === 'mode-duck') {
+                renderDuckLanes();
+            }
+        });
+
+        document.getElementById('remove-winner-btn').addEventListener('click', () => {
+            if (lastWinnerIndex > -1 && currentPrizes[lastWinnerIndex]) {
+                currentPrizes.splice(lastWinnerIndex, 1);
+                wheelConfigs[currentMode] = [...currentPrizes];
+                lastWinnerIndex = -1;
+                if (winModalObj) winModalObj.hide();
+                currentMode === 'mode-duck' ? renderDuckLanes() : resetWheelPosition();
+                initPrizeList();
+            }
+        });
+
+        musicSelect.addEventListener('change', () => {
+            if (['mode-numbers', 'mode-lixi'].includes(currentMode)) {
+                xosoMusic.src = musicSelect.value;
+                xosoMusic.play().catch(() => { });
+            }
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            currentVolume = parseFloat(e.target.value);
+            allAudio.forEach(a => a.volume = isMuted ? 0 : currentVolume);
+            muteBtn.innerHTML = currentVolume == 0 ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        });
+
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            allAudio.forEach(a => a.volume = isMuted ? 0 : currentVolume);
+            muteBtn.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+        });
+
+        updateCustomBtn.addEventListener('click', () => {
+            const text = customEntriesText.value.trim();
+            if (!text) return;
+            const lines = text.split('\n').filter(l => l.trim());
+            currentPrizes = lines.map((name, i) => ({
+                name: name.trim(),
+                color: palette[i % palette.length],
+                icon: currentMode === 'mode-lixi' ? "🧧" : (currentMode === 'mode-duck' ? "🦆" : "✨")
+            }));
+            wheelConfigs[currentMode] = [...currentPrizes];
+            currentMode === 'mode-duck' ? renderDuckLanes() : resetWheelPosition();
+        });
+
+        function resetWheelPosition() {
+            currentRotation = 0;
+            canvas.style.transition = 'none';
+            canvas.style.transform = 'rotate(0deg)';
+            setTimeout(() => {
+                canvas.style.transition = 'transform 5s cubic-bezier(0.1, 0, 0.1, 1)';
+                initPrizeList();
+                drawWheel();
+            }, 50);
+        }
+
+        spinBtn.addEventListener('click', spin);
+        startRaceBtn.addEventListener('click', startRace);
+
+        // Init
+        initPrizeList();
+        drawWheel();
+        allAudio.forEach(a => a.volume = currentVolume);
+    </script>
+
+    <!-- Custom JS for More Tools -->
+    <script src="js/more-tools.js"></script>
+</body>
+
+</html>

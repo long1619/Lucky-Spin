@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bầu Cua 3D Luxe - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #c0392b;
+            --gold: #f1c40f;
+            --dark: #1a1a2e;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #2c3e50 0%, #000 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to bottom, #f1c40f, #e67e22);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Wallet */
+        .wallet {
+            background: var(--glass);
+            padding: 10px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            margin-bottom: 30px;
+            font-weight: 700;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.1);
+        }
+
+        /* 3D Dice Area */
+        .dice-table {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50% / 20%;
+            border: 4px solid rgba(241, 196, 15, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            perspective: 1000px;
+            margin-bottom: 40px;
+        }
+
+        .dice {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            transform-style: preserve-3d;
+            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            backface-visibility: hidden;
+        }
+
+        /* Face positions */
+        .face-1 {
+            transform: rotateY(0deg) translateZ(30px);
+        }
+
+        .face-2 {
+            transform: rotateY(90deg) translateZ(30px);
+        }
+
+        .face-3 {
+            transform: rotateY(180deg) translateZ(30px);
+        }
+
+        .face-4 {
+            transform: rotateY(-90deg) translateZ(30px);
+        }
+
+        .face-5 {
+            transform: rotateX(90deg) translateZ(30px);
+        }
+
+        .face-6 {
+            transform: rotateX(-90deg) translateZ(30px);
+        }
+
+        .dice-face img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        /* Betting Grid */
+        .bet-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .bet-item {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bet-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        .bet-item.active {
+            border-color: var(--gold);
+            background: rgba(241, 196, 15, 0.1);
+        }
+
+        .bet-img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .bet-count {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-shake {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(192, 57, 43, 0.3);
+        }
+
+        .btn-shake:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-clear {
+            background: var(--glass);
+            color: #fff;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(0, 0) rotate(0);
+            }
+
+            20% {
+                transform: translate(-10px, 5px) rotate(-10deg);
+            }
+
+            40% {
+                transform: translate(10px, -5px) rotate(10deg);
+            }
+
+            60% {
+                transform: translate(-10px, -5px) rotate(-10deg);
+            }
+
+            80% {
+                transform: translate(10px, 5px) rotate(10deg);
+            }
+
+            100% {
+                transform: translate(0, 0) rotate(0);
+            }
+        }
+
+        .shaking {
+            animation: shake 0.1s infinite;
+        }
+
+        /* Animation for dice roll */
+        @keyframes roll {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateX(720deg) rotateY(1080deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>BẦU CUA 3D LUXE</h1>
+    </div>
+
+    <div class="wallet">
+        <i class="fas fa-coins text-warning"></i>
+        Tiền của bạn: <span id="balance">10,000</span>
+    </div>
+
+    <div class="dice-table" id="diceTable">
+        <div class="dice" id="dice1">
+            <div class="dice-face face-1"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301138.png" alt="Bầu">
+            </div>
+            <div class="dice-face face-2"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301139.png" alt="Cua">
+            </div>
+            <div class="dice-face face-3"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301140.png" alt="Tôm">
+            </div>
+            <div class="dice-face face-4"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301141.png" alt="Cá">
+            </div>
+            <div class="dice-face face-5"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301142.png" alt="Gà">
+            </div>
+            <div class="dice-face face-6"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301143.png" alt="Nai">
+            </div>
+        </div>
+        <div class="dice" id="dice2">
+            <div class="dice-face face-1"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301138.png" alt="Bầu">
+            </div>
+            <div class="dice-face face-2"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301139.png" alt="Cua">
+            </div>
+            <div class="dice-face face-3"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301140.png" alt="Tôm">
+            </div>
+            <div class="dice-face face-4"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301141.png" alt="Cá">
+            </div>
+            <div class="dice-face face-5"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301142.png" alt="Gà">
+            </div>
+            <div class="dice-face face-6"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301143.png" alt="Nai">
+            </div>
+        </div>
+        <div class="dice" id="dice3">
+            <div class="dice-face face-1"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301138.png" alt="Bầu">
+            </div>
+            <div class="dice-face face-2"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301139.png" alt="Cua">
+            </div>
+            <div class="dice-face face-3"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301140.png" alt="Tôm">
+            </div>
+            <div class="dice-face face-4"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301141.png" alt="Cá">
+            </div>
+            <div class="dice-face face-5"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301142.png" alt="Gà">
+            </div>
+            <div class="dice-face face-6"><img src="https://cdn-icons-png.flaticon.com/512/2301/2301143.png" alt="Nai">
+            </div>
+        </div>
+    </div>
+
+    <div class="bet-grid">
+        <div class="bet-item" data-id="1">
+            <span class="bet-count">0</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2301/2301138.png" class="bet-img">
+            <div>Bầu</div>
+        </div>
+        <div class="bet-item" data-id="2">
+            <span class="bet-count">0</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2301/2301139.png" class="bet-img">
+            <div>Cua</div>
+        </div>
+        <div class="bet-item" data-id="3">
+            <span class="bet-count">0</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2301/2301140.png" class="bet-img">
+            <div>Tôm</div>
+        </div>
+        <div class="bet-item" data-id="4">
+            <span class="bet-count">0</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2301/2301141.png" class="bet-img">
+            <div>Cá</div>
+        </div>
+        <div class="bet-item" data-id="5">
+            <span class="bet-count">0</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2301/2301142.png" class="bet-img">
+            <div>Gà</div>
+        </div>
+        <div class="bet-item" data-id="6">
+            <span class="bet-count">0</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2301/2301143.png" class="bet-img">
+            <div>Nai</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-clear" id="btnClear">Xoá cược</button>
+        <button class="btn btn-shake" id="btnShake">Lắc bầu cua</button>
+    </div>
+
+    <script>
+        let balance = 10000;
+        const bets = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        const diceTable = document.getElementById('diceTable');
+        const balanceEl = document.getElementById('balance');
+        const btnShake = document.getElementById('btnShake');
+        const btnClear = document.getElementById('btnClear');
+
+        // Face orientations for 3D dice [X, Y]
+        const faceRotations = [
+            [0, 0],       // Face 1 (Bầu)
+            [0, -90],     // Face 2 (Cua)
+            [0, -180],    // Face 3 (Tôm)
+            [0, 90],      // Face 4 (Cá)
+            [-90, 0],     // Face 5 (Gà)
+            [90, 0]       // Face 6 (Nai)
+        ];
+
+        document.querySelectorAll('.bet-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                if (balance >= 500) {
+                    balance -= 500;
+                    bets[id] += 500;
+                    updateUI();
+                } else {
+                    alert("Không đủ tiền!");
+                }
+            });
+        });
+
+        btnClear.addEventListener('click', () => {
+            Object.keys(bets).forEach(k => {
+                balance += bets[k];
+                bets[k] = 0;
+            });
+            updateUI();
+        });
+
+        btnShake.addEventListener('click', () => {
+            const currentBets = Object.values(bets).reduce((a, b) => a + b, 0);
+            if (currentBets === 0) {
+                alert("Vui lòng đặt cược!");
+                return;
+            }
+
+            btnShake.disabled = true;
+            diceTable.classList.add('shaking');
+
+            setTimeout(() => {
+                diceTable.classList.remove('shaking');
+                rollDice();
+            }, 1000);
+        });
+
+        function rollDice() {
+            const results = [
+                Math.floor(Math.random() * 6) + 1,
+                Math.floor(Math.random() * 6) + 1,
+                Math.floor(Math.random() * 6) + 1
+            ];
+
+            // Apply rotations to dice
+            [1, 2, 3].forEach((num, idx) => {
+                const dice = document.getElementById(`dice${num}`);
+                const res = results[idx];
+                const rotations = faceRotations[res - 1];
+                // Add extra spins for effect
+                const xExtra = Math.floor(Math.random() * 4) * 360;
+                const yExtra = Math.floor(Math.random() * 4) * 360;
+                dice.style.transform = `rotateX(${rotations[0] + xExtra}deg) rotateY(${rotations[1] + yExtra}deg)`;
+            });
+
+            setTimeout(() => {
+                calculateResults(results);
+                btnShake.disabled = false;
+            }, 1200);
+        }
+
+        function calculateResults(results) {
+            let winAmount = 0;
+            results.forEach(res => {
+                if (bets[res] > 0) {
+                    winAmount += bets[res] * 2; // Win amount (return bet + profit)
+                }
+            });
+
+            balance += winAmount;
+            // Clear bets for next round
+            Object.keys(bets).forEach(k => bets[k] = 0);
+            updateUI();
+
+            if (winAmount > 0) {
+                alert(`Chúc mừng! Bạn đã thắng ${winAmount.toLocaleString()}đ`);
+            }
+        }
+
+        function updateUI() {
+            balanceEl.textContent = balance.toLocaleString();
+            document.querySelectorAll('.bet-item').forEach(item => {
+                const id = item.dataset.id;
+                const count = item.querySelector('.bet-count');
+                if (bets[id] > 0) {
+                    count.style.display = 'block';
+                    count.textContent = (bets[id] / 1000) + "k";
+                } else {
+                    count.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

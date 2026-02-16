@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cờ Caro Master - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2b2d42;
+            --text-muted: #8d99ae;
+            --border: #edf2f4;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .status-panel {
+            background: var(--card);
+            padding: 16px 32px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .player-info.active {
+            background: rgba(67, 97, 238, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+
+        .player-info.player-o.active {
+            background: rgba(247, 37, 133, 0.1);
+            border: 1px solid rgba(247, 37, 133, 0.2);
+        }
+
+        .symbol {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .symbol-x {
+            color: var(--primary);
+        }
+
+        .symbol-o {
+            color: var(--secondary);
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Size Selector */
+        .size-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .size-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .size-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2);
+        }
+
+        /* Game Board */
+        .board-container {
+            background: var(--card);
+            padding: 10px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: auto;
+            max-width: 100%;
+        }
+
+        .board {
+            display: grid;
+            gap: 0;
+            background: #fff;
+            margin: 0 auto;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            border: 0.5px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.4rem;
+            font-weight: 900;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .cell:hover {
+            background-color: #f1f5f9;
+        }
+
+        .cell.last-move::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            top: 2px;
+            right: 2px;
+        }
+
+        .cell.win {
+            background-color: #dcfce7 !important;
+            animation: pulse-win 1s infinite;
+        }
+
+        @keyframes pulse-win {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* X and O animation */
+        .marker {
+            animation: pop-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop-in {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 32px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 14px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+
+        .btn-restart {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 14px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-home {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-home:hover {
+            background: #f8fa9b;
+            transform: translateY(-2px);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 32px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: modal-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modal-pop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .win-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .modal-body {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .board {
+                grid-template-columns: repeat(15, 25px);
+                grid-template-rows: repeat(15, 25px);
+            }
+
+            .cell {
+                width: 25px;
+                height: 25px;
+                font-size: 0.9rem;
+            }
+
+            .status-panel {
+                padding: 12px 20px;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Caro Master</h1>
+        </div>
+
+        <div class="status-panel">
+            <div class="player-info player-x active" id="playerXInfo">
+                <span class="symbol symbol-x">X</span>
+                <span class="player-name">Người chơi 1</span>
+            </div>
+            <div style="font-weight: 800; color: var(--border);">VS</div>
+            <div class="player-info player-o" id="playerOInfo">
+                <span class="symbol symbol-o">O</span>
+                <span class="player-name">Người chơi 2</span>
+            </div>
+        </div>
+
+        <div class="size-selector">
+            <button class="size-btn" onclick="changeSize(3)">3x3</button>
+            <button class="size-btn" onclick="changeSize(5)">5x5</button>
+            <button class="size-btn" onclick="changeSize(7)">7x7</button>
+            <button class="size-btn active" onclick="changeSize(15)">15x15</button>
+        </div>
+
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-home" onclick="location.href='index.html'">
+                <i class="fas fa-home"></i> Trang chủ
+            </button>
+            <button class="btn btn-restart" id="restartBtn">
+                <i class="fas fa-redo"></i> Chơi lại
+            </button>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <div class="win-icon" id="winIcon">🏆</div>
+            <h2 class="modal-title" id="winTitle">X Thắng!</h2>
+            <p class="modal-body">Một trận đấu tuyệt vời!</p>
+            <button class="btn btn-restart" style="margin: 0 auto; width: 100%; justify-content: center;"
+                onclick="resetGame()">
+                Chơi ván mới
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let boardSize = 15;
+        let winCondition = 5;
+        let currentPlayer = 'X';
+        let gameBoard = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
+        let isGameOver = false;
+
+        const boardEl = document.getElementById('board');
+        const playerXInfo = document.getElementById('playerXInfo');
+        const playerOInfo = document.getElementById('playerOInfo');
+        const winModal = document.getElementById('winModal');
+        const winTitle = document.getElementById('winTitle');
+        const restartBtn = document.getElementById('restartBtn');
+
+        function changeSize(size) {
+            boardSize = size;
+            // Set win condition based on size
+            if (size === 3) winCondition = 3;
+            else if (size === 5) winCondition = 4;
+            else winCondition = 5;
+
+            // Update UI buttons
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent === `${size}x${size}`) btn.classList.add('active');
+            });
+
+            resetGame();
+        }
+
+        // Initialize board UI
+        function createBoard() {
+            boardEl.innerHTML = '';
+            boardEl.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+            boardEl.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
+
+            // Adjust cell size for smaller boards
+            const cellSize = boardSize <= 7 ? '60px' : '40px';
+            const fontSize = boardSize <= 7 ? '2.5rem' : '1.4rem';
+
+            for (let r = 0; r < boardSize; r++) {
+                for (let c = 0; c < boardSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.style.width = cellSize;
+                    cell.style.height = cellSize;
+                    cell.style.fontSize = fontSize;
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.addEventListener('click', () => handleMove(r, c, cell));
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        function handleMove(r, c, cell) {
+            if (gameBoard[r][c] !== '' || isGameOver) return;
+
+            // Update data
+            gameBoard[r][c] = currentPlayer;
+
+            // Mark last move
+            document.querySelectorAll('.cell.last-move').forEach(el => el.classList.remove('last-move'));
+            cell.classList.add('last-move');
+
+            // Update UI
+            const marker = document.createElement('span');
+            marker.className = `marker symbol-${currentPlayer.toLowerCase()}`;
+            marker.textContent = currentPlayer;
+            cell.appendChild(marker);
+
+            // Check win
+            const winningCells = checkWin(r, c, currentPlayer);
+            if (winningCells) {
+                endGame(currentPlayer, winningCells);
+            } else {
+                // Check Draw
+                if (gameBoard.flat().every(cell => cell !== '')) {
+                    endGame('Draw', null);
+                    return;
+                }
+                // Switch turn
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                playerXInfo.classList.toggle('active');
+                playerOInfo.classList.toggle('active');
+            }
+        }
+
+        function checkWin(r, c, player) {
+            const directions = [
+                [[0, 1], [0, -1]], // Horizontal
+                [[1, 0], [-1, 0]], // Vertical
+                [[1, 1], [-1, -1]], // Diagonal \
+                [[1, -1], [-1, 1]]  // Diagonal /
+            ];
+
+            for (let dir of directions) {
+                let count = 1;
+                let cells = [[r, c]];
+
+                for (let [dr, dc] of dir) {
+                    let nr = r + dr;
+                    let nc = c + dc;
+                    while (nr >= 0 && nr < boardSize && nc >= 0 && nc < boardSize && gameBoard[nr][nc] === player) {
+                        count++;
+                        cells.push([nr, nc]);
+                        nr += dr;
+                        nc += dc;
+                    }
+                }
+
+                if (count >= winCondition) return cells;
+            }
+            return null;
+        }
+
+        function endGame(winner, winningCells) {
+            isGameOver = true;
+
+            if (winner === 'Draw') {
+                winTitle.textContent = "Hòa!";
+                winTitle.className = "modal-title";
+                winModal.style.display = 'flex';
+                return;
+            }
+
+            // Highlight winning cells
+            winningCells.forEach(([r, c]) => {
+                const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+                cell.classList.add('win');
+            });
+
+            setTimeout(() => {
+                winTitle.textContent = `${winner} Thắng!`;
+                winTitle.className = `modal-title symbol-${winner.toLowerCase()}`;
+                winModal.style.display = 'flex';
+            }, 800);
+        }
+
+        function resetGame() {
+            gameBoard = Array(boardSize).fill().map(() => Array(boardSize).fill(''));
+            isGameOver = false;
+            currentPlayer = 'X';
+            playerXInfo.classList.add('active');
+            playerOInfo.classList.remove('active');
+            winModal.style.display = 'none';
+            createBoard();
+        }
+
+        restartBtn.addEventListener('click', resetGame);
+
+        // Start
+        createBoard();
+    </script>
+</body>
+
+</html>

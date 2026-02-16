@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nối Chữ - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4cc9f0, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-container {
+            flex: 1;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 20px;
+            border-radius: 18px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+
+        #wordInput {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        #sendBtn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.05);
+            background: var(--success);
+        }
+
+        .game-status {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .btn-home {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-header">
+        <h1>NỐI CHỮ</h1>
+        <p style="color: rgba(255,255,255,0.6)">Bắt đầu bằng một từ có 2 chữ!</p>
+    </div>
+
+    <div class="chat-container">
+        <div class="game-status" id="status">Lượt của bạn!</div>
+        <div class="messages" id="messages">
+            <div class="message ai">Chào bạn! Hãy bắt đầu trò chơi nối chữ. Bạn đi trước nhé!</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="wordInput" placeholder="Ví dụ: Công viên" autocomplete="off">
+            <button id="sendBtn" onclick="handleSend()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-home">
+        <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
+    </a>
+
+    <script>
+        const messagesEl = document.getElementById('messages');
+        const wordInput = document.getElementById('wordInput');
+        const statusEl = document.getElementById('status');
+
+        let lastWord = "";
+        let usedWords = [];
+
+        // Simple AI vocabulary for Vietnamese word linking
+        const aiVocab = {
+            "học": ["học sinh", "học tập", "học hỏi", "học đường"],
+            "sinh": ["sinh viên", "sinh nhật", "sinh sống", "sinh học"],
+            "hạnh": ["hạnh phúc", "hạnh kiểm"],
+            "phúc": ["phúc đức", "phúc lợi"],
+            "tập": ["tập làm", "tập viết", "tập duyệt"],
+            "viết": ["viết lách", "viết bài"],
+            "bài": ["bài hát", "bài toán", "bài vở"],
+            "hát": ["hát hò", "hát hay"],
+            "công": ["công viên", "công nghệ", "công ty"],
+            "viên": ["viên gạch", "viên đá", "viên phấn"],
+            "ty": ["ty tỷ"],
+            "nghệ": ["nghệ thuật", "nghệ sĩ"],
+            "thuật": ["thuật toán", "thuật ngữ"],
+            "đường": ["đường phố", "đường ray", "đường xá"],
+            "phố": ["phố xá", "phố phường"],
+            "xá": ["xá lợi", "xá tội"],
+            "quần": ["quần áo", "quần đùi", "quần vợt"],
+            "áo": ["áo dài", "áo len", "áo khoác"],
+            "dài": ["dài dằng", "dài lâu"],
+            "lâu": ["lâu đài", "lâu năm"],
+            "đài": ["đài phát thanh", "đài truyền hình"],
+            "trận": ["trận đấu", "trận mạc"],
+            "đấu": ["đấu tranh", "đấu thầu"],
+            "thầu": ["thầu dầu"],
+            "nhà": ["nhà ở", "nhà cửa", "nhà báo"],
+            "cửa": ["cửa sổ", "cửa hàng"],
+            "sổ": ["sổ sách", "sổ tay"],
+            "sách": ["sách giáo khoa", "sách vở"],
+            "vở": ["vở kịch", "vở sạch"],
+            "học": ["học đường"]
+        };
+
+        function addMessage(text, sender) {
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+            msg.textContent = text;
+            messagesEl.appendChild(msg);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        function handleSend() {
+            const input = wordInput.value.trim().toLowerCase();
+            if (!input) return;
+
+            const parts = input.split(' ');
+            if (parts.length < 2) {
+                alert("Vui lòng nhập cụm từ có ít nhất 2 chữ!");
+                return;
+            }
+
+            // Check rule
+            if (lastWord && parts[0] !== lastWord) {
+                alert(`Từ của bạn phải bắt đầu bằng chữ "${lastWord}"!`);
+                return;
+            }
+
+            if (usedWords.includes(input)) {
+                alert("Từ này đã được sử dụng rồi!");
+                return;
+            }
+
+            addMessage(input, 'user');
+            usedWords.push(input);
+            lastWord = parts[parts.length - 1];
+            wordInput.value = "";
+            statusEl.textContent = "AI đang suy nghĩ...";
+
+            setTimeout(() => {
+                aiRespond(lastWord);
+            }, 800);
+        }
+
+        function aiRespond(key) {
+            let possibleAnswers = aiVocab[key] || [];
+
+            // Filter out used words
+            possibleAnswers = possibleAnswers.filter(w => !usedWords.includes(w));
+
+            if (possibleAnswers.length > 0) {
+                const response = possibleAnswers[Math.floor(Math.random() * possibleAnswers.length)];
+                addMessage(response, 'ai');
+                usedWords.push(response);
+                const resParts = response.split(' ');
+                lastWord = resParts[resParts.length - 1];
+                statusEl.textContent = "Lượt của bạn!";
+            } else {
+                // If no vocab matches, AI might try to generate something or concede
+                // For simplicity, let's say AI can connect to many common words
+                addMessage(`Tôi chịu thua rồi! Bạn giỏi quá. Chữ "${key}" khó thật.`, 'ai');
+                statusEl.textContent = "BẠN ĐÃ CHIẾN THẮNG! 🎉";
+                wordInput.disabled = true;
+            }
+        }
+
+        wordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+    </script>
+</body>
+
+</html>

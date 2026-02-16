@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đoán Hình - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4cc9f0, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            position: relative;
+            border: 2px solid var(--border);
+        }
+
+        #targetImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: blur(20px) grayscale(1);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #targetImage.clear {
+            filter: blur(0) grayscale(0);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        #answerInput {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            outline: none;
+        }
+
+        .btn-check {
+            padding: 0 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .hint-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--success);
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .feedback {
+            font-weight: 600;
+            min-height: 24px;
+            margin-bottom: 15px;
+        }
+
+        .btn-home {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .level-info {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-card">
+        <div class="level-info" id="levelDisplay">Cấp độ 1</div>
+        <h1>ĐOÁN HÌNH</h1>
+
+        <div class="image-container">
+            <img id="targetImage" src="" alt="Guess this!">
+        </div>
+
+        <div class="feedback" id="feedback">Bạn đoán xem đây là cái gì?</div>
+
+        <div class="input-group">
+            <input type="text" id="answerInput" placeholder="Nhập câu trả lời..." autocomplete="off">
+            <button class="btn-check" onclick="checkAnswer()">GỬI</button>
+        </div>
+
+        <button class="hint-btn" onclick="useHint()">Gợi ý (mất 5 điểm)</button>
+
+        <div style="display: flex; justify-content: space-between; font-weight: 700;">
+            <span>Điểm: <span id="score">0</span></span>
+            <span id="nextMsg" style="color: var(--success); display: none;">Tự động chuyển tiếp sau 2 giây...</span>
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-home">
+        <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
+    </a>
+
+    <script>
+        const imageDatabase = [
+            { url: 'https://images.unsplash.com/photo-1543332164-6e82f355badc?w=800', answers: ['pizza', 'bánh pizza'] },
+            { url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800', answers: ['mèo', 'con mèo', 'cat'] },
+            { url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800', answers: ['người', 'cô gái', 'girl'] },
+            { url: 'https://images.unsplash.com/photo-1521747116042-5a810fda9664?w=800', answers: ['thành phố', 'city', 'nhà cao tầng'] },
+            { url: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=800', answers: ['đất nước', 'núi', 'phong cảnh'] },
+            { url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800', answers: ['apple', 'táo', 'laptop', 'macbook'] }
+        ];
+
+        let currentLevel = 0;
+        let score = 0;
+        let blurAmount = 20;
+
+        const targetImage = document.getElementById('targetImage');
+        const answerInput = document.getElementById('answerInput');
+        const feedback = document.getElementById('feedback');
+        const scoreEl = document.getElementById('score');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const nextMsg = document.getElementById('nextMsg');
+
+        function initLevel() {
+            const data = imageDatabase[currentLevel];
+            targetImage.src = data.url;
+            targetImage.classList.remove('clear');
+            blurAmount = 20;
+            targetImage.style.filter = `blur(${blurAmount}px) grayscale(1)`;
+            answerInput.value = '';
+            answerInput.disabled = false;
+            feedback.textContent = 'Bạn đoán xem đây là cái gì?';
+            feedback.style.color = '#fff';
+            levelDisplay.textContent = `Cấp độ ${currentLevel + 1}`;
+            nextMsg.style.display = 'none';
+        }
+
+        function checkAnswer() {
+            const userGuess = answerInput.value.trim().toLowerCase();
+            if (!userGuess) return;
+
+            const correctAnswers = imageDatabase[currentLevel].answers;
+
+            if (correctAnswers.some(ans => userGuess.includes(ans) || ans.includes(userGuess))) {
+                winLevel();
+            } else {
+                feedback.textContent = 'Sai rồi, thử lại nhé!';
+                feedback.style.color = 'var(--secondary)';
+                blurAmount = Math.max(0, blurAmount - 3);
+                targetImage.style.filter = `blur(${blurAmount}px) grayscale(${blurAmount / 20})`;
+            }
+        }
+
+        function useHint() {
+            if (score < 5) {
+                feedback.textContent = 'Không đủ điểm để lấy gợi ý!';
+                return;
+            }
+            score -= 5;
+            scoreEl.textContent = score;
+            blurAmount = Math.max(0, blurAmount - 8);
+            targetImage.style.filter = `blur(${blurAmount}px) grayscale(${blurAmount / 20})`;
+            feedback.textContent = 'Hình ảnh đã rõ hơn một chút!';
+        }
+
+        function winLevel() {
+            score += 20;
+            scoreEl.textContent = score;
+            feedback.textContent = 'CHÍNH XÁC! 🎉';
+            feedback.style.color = 'var(--success)';
+            targetImage.classList.add('clear');
+            targetImage.style.filter = 'none';
+            answerInput.disabled = true;
+            nextMsg.style.display = 'block';
+
+            confetti({
+                particleCount: 80,
+                spread: 50,
+                origin: { y: 0.8 }
+            });
+
+            setTimeout(() => {
+                currentLevel++;
+                if (currentLevel >= imageDatabase.length) {
+                    currentLevel = 0; // Loop back for demo
+                }
+                initLevel();
+            }, 2500);
+        }
+
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        initLevel();
+    </script>
+</body>
+
+</html>

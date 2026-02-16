@@ -1,0 +1,126 @@
+/* --- More Tools Section Styles --- */
+.more-tools-section {
+    position: relative;
+    z-index: 20;
+    margin-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.more-tools-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.tools-header {
+    background: #f1f5f9;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tools-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+}
+
+.tools-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+
+@media (min-width: 992px) {
+    .tools-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1px;
+        background: #f1f5f9;
+    }
+}
+
+.tool-item {
+    display: flex;
+    padding: 24px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    align-items: flex-start;
+    background: white;
+    height: 100%;
+}
+
+.tool-item:hover {
+    background: #f8fafc;
+    z-index: 1;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.tool-thumb {
+    width: 100px;
+    height: 80px;
+    flex-shrink: 0;
+    margin-right: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tool-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.tool-item:hover .tool-thumb img {
+    transform: scale(1.1);
+}
+
+.tool-info {
+    flex: 1;
+}
+
+.tool-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #10b981;
+    /* Green color like the image */
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.tool-desc {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* --- Responsive for Mobile --- */
+@media (max-width: 576px) {
+    .tool-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .tool-thumb {
+        width: 100%;
+        height: 150px;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .tool-title {
+        font-size: 1rem;
+    }
+
+    .tool-desc {
+        font-size: 0.9rem;
+    }
+}

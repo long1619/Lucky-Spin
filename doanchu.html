@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đoán Chữ - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --bg: #050510;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4cc9f0, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .word-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .letter-box {
+            width: 50px;
+            height: 60px;
+            border-bottom: 4px solid var(--primary);
+            font-size: 2.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .letter-box.revealed {
+            border-bottom-color: var(--success);
+            color: var(--success);
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hint-text {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 20px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(67, 97, 238, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .key {
+            width: 45px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+
+        .key:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .key.correct {
+            background: var(--success);
+            border-color: var(--success);
+            pointer-events: none;
+        }
+
+        .key.wrong {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.2);
+            border-color: transparent;
+            pointer-events: none;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        .btn-home {
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-home:hover {
+            color: #fff;
+        }
+
+        #nextBtn {
+            margin-top: 20px;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+        }
+
+        .hangman-svg {
+            margin-bottom: 20px;
+            width: 120px;
+            height: 120px;
+        }
+
+        .hangman-svg line,
+        .hangman-svg circle {
+            stroke: #fff;
+            stroke-width: 4;
+            fill: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hangman-svg .visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>ĐOÁN CHỮ</h1>
+
+        <div class="game-card">
+            <svg class="hangman-svg" viewBox="0 0 100 100">
+                <!-- Scaffold -->
+                <line x1="20" y1="90" x2="80" y2="90" style="opacity: 1;" />
+                <line x1="30" y1="90" x2="30" y2="10" style="opacity: 1;" />
+                <line x1="30" y1="10" x2="70" y2="10" style="opacity: 1;" />
+                <line x1="70" y1="10" x2="70" y2="20" style="opacity: 1;" />
+                <!-- Body Parts -->
+                <circle id="part-head" cx="70" cy="30" r="10" />
+                <line id="part-body" x1="70" y1="40" x2="70" y2="70" />
+                <line id="part-arm-l" x1="70" y1="50" x2="50" y2="40" />
+                <line id="part-arm-r" x1="70" y1="50" x2="90" y2="40" />
+                <line id="part-leg-l" x1="70" y1="70" x2="55" y2="85" />
+                <line id="part-leg-r" x1="70" y1="70" x2="85" y2="85" />
+            </svg>
+
+            <div class="category-tag" id="categoryName">Động vật</div>
+            <div class="hint-text" id="hintText">Từ này có 5 chữ cái</div>
+
+            <div class="word-display" id="wordDisplay"></div>
+
+            <div class="keyboard" id="keyboard"></div>
+
+            <button id="nextBtn" onclick="initGame()">TIẾP THEO</button>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-val" id="score">0</div>
+                <div class="info-label">Điểm</div>
+            </div>
+            <div class="info-item">
+                <div class="info-val" id="lives">6</div>
+                <div class="info-label">Mạng</div>
+            </div>
+        </div>
+
+        <a href="index.html" class="btn-home">
+            <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
+        </a>
+    </div>
+
+    <script>
+        const wordsList = [
+            { word: 'CHO', cat: 'Động vật', hint: 'Bạn thân nhất của con người' },
+            { word: 'MEO', cat: 'Động vật', hint: 'Thích bắt chuột và ngủ' },
+            { word: 'HO', cat: 'Động vật', hint: 'Chúa tể sơn lâm' },
+            { word: 'VOI', cat: 'Động vật', hint: 'Có cái vòi rất dài' },
+            { word: 'GA', cat: 'Động vật', hint: 'Gáy báo thức mỗi sáng' },
+            { word: 'CHUOI', cat: 'Trái cây', hint: 'Khỉ rất thích ăn' },
+            { word: 'XOAI', cat: 'Trái cây', hint: 'Quả có hạt to, vị ngọt hoặc chua' },
+            { word: 'CAM', cat: 'Trái cây', hint: 'Nhiều Vitamin C, vỏ màu cam' },
+            { word: 'TAO', cat: 'Trái cây', hint: 'Quả của Isaac Newton' },
+            { word: 'VIETNAM', cat: 'Quốc gia', hint: 'Đất nước hình chữ S' },
+            { word: 'NHAPAN', cat: 'Quốc gia', hint: 'Xứ sở hoa anh đào' },
+            { word: 'PHAP', cat: 'Quốc gia', hint: 'Có tháp Eiffel nổi tiếng' }
+        ];
+
+        let currentWord = '';
+        let guessedLetters = [];
+        let score = 0;
+        let lives = 6;
+        let gameOver = false;
+
+        const wordDisplay = document.getElementById('wordDisplay');
+        const keyboard = document.getElementById('keyboard');
+        const livesEl = document.getElementById('lives');
+        const scoreEl = document.getElementById('score');
+        const categoryEl = document.getElementById('categoryName');
+        const hintEl = document.getElementById('hintText');
+        const nextBtn = document.getElementById('nextBtn');
+
+        const bodyParts = ['part-head', 'part-body', 'part-arm-l', 'part-arm-r', 'part-leg-l', 'part-leg-r'];
+
+        function initGame() {
+            const randomObj = wordsList[Math.floor(Math.random() * wordsList.length)];
+            currentWord = randomObj.word;
+            categoryEl.textContent = randomObj.cat;
+            hintEl.textContent = randomObj.hint;
+
+            guessedLetters = [];
+            lives = 6;
+            gameOver = false;
+
+            livesEl.textContent = lives;
+            nextBtn.style.display = 'none';
+
+            // Reset Hangman
+            bodyParts.forEach(id => document.getElementById(id).classList.remove('visible'));
+
+            renderWord();
+            renderKeyboard();
+        }
+
+        function renderWord() {
+            wordDisplay.innerHTML = '';
+            currentWord.split('').forEach(letter => {
+                const box = document.createElement('div');
+                box.className = 'letter-box';
+                if (guessedLetters.includes(letter)) {
+                    box.textContent = letter;
+                    box.classList.add('revealed');
+                } else {
+                    box.textContent = '';
+                }
+                wordDisplay.appendChild(box);
+            });
+        }
+
+        function renderKeyboard() {
+            keyboard.innerHTML = '';
+            const letters = 'ABCDEGHIKLMNOPQRSTUVXY'.split('');
+            letters.forEach(l => {
+                const key = document.createElement('div');
+                key.className = 'key';
+                key.textContent = l;
+                key.onclick = () => handleGuess(l);
+                keyboard.appendChild(key);
+            });
+        }
+
+        function handleGuess(letter) {
+            if (gameOver || guessedLetters.includes(letter)) return;
+
+            guessedLetters.push(letter);
+            const keys = document.querySelectorAll('.key');
+            const key = Array.from(keys).find(k => k.textContent === letter);
+
+            if (currentWord.includes(letter)) {
+                key.classList.add('correct');
+                renderWord();
+                checkWin();
+            } else {
+                key.classList.add('wrong');
+                lives--;
+                livesEl.textContent = lives;
+                updateHangman();
+                checkLose();
+            }
+        }
+
+        function updateHangman() {
+            const partIndex = 6 - lives - 1;
+            if (partIndex >= 0 && partIndex < bodyParts.length) {
+                document.getElementById(bodyParts[partIndex]).classList.add('visible');
+            }
+        }
+
+        function checkWin() {
+            const isWin = currentWord.split('').every(l => guessedLetters.includes(l));
+            if (isWin) {
+                gameOver = true;
+                score += 10;
+                scoreEl.textContent = score;
+                hintEl.textContent = 'XUẤT SẮC! Bạn đã đoán đúng!';
+                hintEl.style.color = 'var(--success)';
+                nextBtn.style.display = 'inline-block';
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function checkLose() {
+            if (lives <= 0) {
+                gameOver = true;
+                hintEl.textContent = `THUA RỒI! Từ đúng là: ${currentWord}`;
+                hintEl.style.color = 'var(--secondary)';
+                nextBtn.style.display = 'inline-block';
+                // Reveal all letters
+                guessedLetters = currentWord.split('');
+                renderWord();
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+
+</html>

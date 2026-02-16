@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kéo Búa Bao - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --dark: #050510;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #050510 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #4cc9f0, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+
+        .player-score {
+            background: var(--glass);
+            padding: 20px 40px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            min-width: 150px;
+        }
+
+        .score-val {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        /* Game Battle Area */
+        .battle-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 60px;
+            min-height: 200px;
+        }
+
+        .choice-display {
+            width: 180px;
+            height: 180px;
+            background: var(--glass);
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .choice-display.thinking {
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-20px);
+            }
+        }
+
+        .vs-label {
+            font-size: 2rem;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Options */
+        .options {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .option-btn {
+            width: 100px;
+            height: 100px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 2.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-10px) scale(1.1);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.3);
+        }
+
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Result Popup */
+        #resultToast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0;
+            padding: 30px 60px;
+            border-radius: 30px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            z-index: 1000;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+        }
+
+        #resultToast.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .win {
+            background: rgba(76, 201, 240, 0.9);
+            color: white;
+        }
+
+        .lose {
+            background: rgba(247, 37, 133, 0.9);
+            color: white;
+        }
+
+        .draw {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-home {
+            margin-top: 50px;
+            padding: 12px 30px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn-home:hover {
+            color: #fff;
+            background: var(--glass);
+        }
+
+        @media (max-width: 600px) {
+            .battle-area {
+                gap: 20px;
+            }
+
+            .choice-display {
+                width: 120px;
+                height: 120px;
+                font-size: 3rem;
+            }
+
+            .vs-label {
+                font-size: 1.2rem;
+            }
+
+            .score-board {
+                gap: 20px;
+            }
+
+            .player-score {
+                padding: 15px 25px;
+                min-width: 120px;
+            }
+
+            .option-btn {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>KÉO BÚA BAO</h1>
+        </div>
+
+        <div class="score-board">
+            <div class="player-score">
+                <div class="score-val" id="playerScore">0</div>
+                <div class="score-label">BẠN</div>
+            </div>
+            <div class="player-score">
+                <div class="score-val" id="computerScore">0</div>
+                <div class="score-label">MÁY</div>
+            </div>
+        </div>
+
+        <div class="battle-area">
+            <div class="choice-display" id="playerChoice">❓</div>
+            <span class="vs-label">V.S</span>
+            <div class="choice-display" id="computerChoice">❓</div>
+        </div>
+
+        <div class="options">
+            <button class="option-btn" onclick="playGame('👊')">👊</button>
+            <button class="option-btn" onclick="playGame('✌️')">✌️</button>
+            <button class="option-btn" onclick="playGame('✋')">✋</button>
+        </div>
+
+        <a href="index.html" class="btn-home">
+            <i class="fas fa-arrow-left"></i> QUAY LẠI TRANG CHỦ
+        </a>
+    </div>
+
+    <div id="resultToast">HÒA!</div>
+
+    <script>
+        let pScore = 0;
+        let cScore = 0;
+        const options = ['👊', '✌️', '✋'];
+
+        const playerChoiceEl = document.getElementById('playerChoice');
+        const computerChoiceEl = document.getElementById('computerChoice');
+        const playerScoreEl = document.getElementById('playerScore');
+        const computerScoreEl = document.getElementById('computerScore');
+        const resultToast = document.getElementById('resultToast');
+
+        function playGame(pChoice) {
+            // Reset UI
+            playerChoiceEl.textContent = pChoice;
+            computerChoiceEl.textContent = '❓';
+            computerChoiceEl.classList.add('thinking');
+
+            // Disable buttons temporarily
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => b.style.pointerEvents = 'none');
+
+            setTimeout(() => {
+                computerChoiceEl.classList.remove('thinking');
+                const cChoice = options[Math.floor(Math.random() * 3)];
+                computerChoiceEl.textContent = cChoice;
+
+                determineWinner(pChoice, cChoice);
+
+                // Re-enable buttons
+                setTimeout(() => {
+                    btns.forEach(b => b.style.pointerEvents = 'auto');
+                }, 500);
+            }, 600);
+        }
+
+        function determineWinner(p, c) {
+            let result = '';
+            let statusClass = '';
+
+            if (p === c) {
+                result = 'HÒA!';
+                statusClass = 'draw';
+            } else if (
+                (p === '👊' && c === '✌️') ||
+                (p === '✌️' && c === '✋') ||
+                (p === '✋' && c === '👊')
+            ) {
+                result = 'BẠN THẮNG!';
+                statusClass = 'win';
+                pScore++;
+            } else {
+                result = 'BẠN THUA!';
+                statusClass = 'lose';
+                cScore++;
+            }
+
+            // Update scores
+            playerScoreEl.textContent = pScore;
+            computerScoreEl.textContent = cScore;
+
+            // Show Toast
+            resultToast.textContent = result;
+            resultToast.className = statusClass + ' show';
+
+            setTimeout(() => {
+                resultToast.classList.remove('show');
+            }, 1200);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đại Chiến Ném Đá - Lucky Spin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF9F1C;
+            --secondary: #2EC4B6;
+            --danger: #E71D36;
+            --dark: #011627;
+            --light: #FDFFFC;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #a8dadc;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 600px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F7FA 70%, #d4a373 70%, #faedcd 100%);
+            margin-top: 20px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            border: 8px solid #fff;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .top-bar {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+        }
+
+        .health-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #eee;
+            border-radius: 6px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .health-bar-fill {
+            height: 100%;
+            background: var(--danger);
+            width: 100%;
+            transition: width 0.3s;
+        }
+
+        .wind-indicator {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            color: #fff;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Menu Overlay */
+        #menu-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(1, 22, 39, 0.8);
+            display: flex;
+            flex-direction: center;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        .menu-box {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .menu-box h1 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: var(--dark);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-pvc {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-pvp {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .power-meter {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            display: none;
+        }
+
+        .power-fill {
+            height: 100%;
+            background: linear-gradient(to right, #4cc9f0, #f72585);
+            width: 0%;
+            border-radius: 10px;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+        #turn-msg {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--dark);
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="ui-layer">
+            <div class="top-bar">
+                <div class="player-card">
+                    <div style="font-weight: 800;" id="p1-name">Người chơi 1</div>
+                    <div class="health-bar-bg">
+                        <div id="p1-health" class="health-bar-fill"></div>
+                    </div>
+                </div>
+
+                <div class="wind-indicator">
+                    <i class="fas fa-wind"></i>
+                    <span id="wind-text">GIÓ: 0</span>
+                    <i id="wind-arrow" class="fas fa-long-arrow-alt-right"></i>
+                </div>
+
+                <div class="player-card">
+                    <div style="font-weight: 800; text-align: right;" id="p2-name">Máy</div>
+                    <div class="health-bar-bg">
+                        <div id="p2-health" class="health-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="turn-msg">Lượt của bạn!</div>
+
+            <div class="power-meter" id="power-meter">
+                <div class="power-fill" id="power-fill"></div>
+            </div>
+        </div>
+
+        <div id="menu-overlay">
+            <div class="menu-box">
+                <h1>Ném Đá Đại Chiến</h1>
+                <button class="btn btn-pvc" onclick="startGame('pvc')">
+                    <i class="fas fa-robot"></i> Đấu với Máy
+                </button>
+                <button class="btn btn-pvp" onclick="startGame('pvp')">
+                    <i class="fas fa-user-friends"></i> Đua 2 Người
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <a href="index.html" style="text-decoration: none; color: #1d3557; font-weight: 700;">
+            <i class="fas fa-arrow-left"></i> Quay lại trang chủ
+        </a>
+    </div>
+
+    <!-- Audio Placeholder -->
+    <audio id="snd-throw" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="snd-hit" src="https://assets.mixkit.co/active_storage/sfx/2042/2042-preview.mp3"></audio>
+    <audio id="snd-miss" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('game-container');
+
+        canvas.width = 1000;
+        canvas.height = 600;
+
+        let gameMode = 'pvc';
+        let isPowering = false;
+        let power = 0;
+        let powerDirection = 1;
+        let currentTurn = 1; // 1 or 2
+        let gameActive = false;
+        let wind = 0;
+
+        const GRAVITY = 0.15;
+        let stone = null;
+
+        const players = [
+            { id: 1, x: 100, y: 420, health: 100, img: '👨', color: '#4361ee' },
+            { id: 2, x: 850, y: 420, health: 100, img: '🤖', color: '#f72585' }
+        ];
+
+        function startGame(mode) {
+            gameMode = mode;
+            document.getElementById('menu-overlay').style.display = 'none';
+            document.getElementById('p2-name').textContent = mode === 'pvc' ? 'Máy' : 'Người chơi 2';
+            players[1].img = mode === 'pvc' ? '🤖' : '👨';
+            resetGame();
+            gameActive = true;
+            nextTurn();
+        }
+
+        function resetGame() {
+            players[0].health = 100;
+            players[1].health = 100;
+            updateUI();
+            currentTurn = 2; // Will be flipped to 1 in nextTurn()
+            stone = null;
+        }
+
+        function nextTurn() {
+            currentTurn = currentTurn === 1 ? 2 : 1;
+            updateWind();
+            showTurnMsg();
+
+            if (gameMode === 'pvc' && currentTurn === 2) {
+                setTimeout(computerTurn, 1500);
+            }
+        }
+
+        function updateWind() {
+            wind = (Math.random() - 0.5) * 4;
+            document.getElementById('wind-text').textContent = `GIÓ: ${Math.abs(wind).toFixed(1)}`;
+            const arrow = document.getElementById('wind-arrow');
+            arrow.style.transform = wind >= 0 ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        function showTurnMsg() {
+            const msg = document.getElementById('turn-msg');
+            msg.textContent = currentTurn === 1 ? "Lượt của bạn!" : (gameMode === 'pvc' ? "Máy đang ném..." : "Lượt Người chơi 2!");
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 1000);
+        }
+
+        function updateUI() {
+            document.getElementById('p1-health').style.width = players[0].health + '%';
+            document.getElementById('p2-health').style.width = players[1].health + '%';
+        }
+
+        function throwStone(angle, force) {
+            if (stone) return;
+
+            const startX = currentTurn === 1 ? players[0].x + 40 : players[1].x - 10;
+            const startY = players[0].y;
+
+            const vx = Math.cos(angle) * force;
+            const vy = Math.sin(angle) * force;
+
+            stone = { x: startX, y: startY, vx, vy };
+            document.getElementById('snd-throw').play();
+        }
+
+        // Input Handling
+        container.addEventListener('mousedown', () => {
+            if (!gameActive || stone || (gameMode === 'pvc' && currentTurn === 2)) return;
+            isPowering = true;
+            power = 0;
+            document.getElementById('power-meter').style.display = 'block';
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (!isPowering) return;
+            isPowering = false;
+            document.getElementById('power-meter').style.display = 'none';
+
+            // Calculate angle based on click position or preset
+            const angle = currentTurn === 1 ? -Math.PI / 4 : -Math.PI * 0.75;
+            throwStone(angle, power / 5);
+        });
+
+        function computerTurn() {
+            if (!gameActive) return;
+            // Simple AI
+            const dist = players[1].x - players[0].x;
+            const force = 10 + (Math.random() * 4) - (wind * 2);
+            throwStone(-Math.PI * 0.75, force);
+        }
+
+        function update() {
+            if (isPowering) {
+                power += 2 * powerDirection;
+                if (power >= 100 || power <= 0) powerDirection *= -1;
+                document.getElementById('power-fill').style.width = power + '%';
+            }
+
+            if (stone) {
+                stone.vx += wind * 0.01;
+                stone.vy += GRAVITY;
+                stone.x += stone.vx;
+                stone.y += stone.vy;
+
+                // Check collision with players
+                players.forEach(p => {
+                    const dx = stone.x - (p.x + 25);
+                    const dy = stone.y - (p.y + 25);
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 40) {
+                        p.health -= 25;
+                        stone = null;
+                        document.getElementById('snd-hit').play();
+                        shakeScreen();
+                        updateUI();
+                        checkGameOver();
+                        if (gameActive) setTimeout(nextTurn, 1000);
+                    }
+                });
+
+                // Check floor or walls
+                if (stone && (stone.y > 450 || stone.x < 0 || stone.x > 1000)) {
+                    document.getElementById('snd-miss').play();
+                    stone = null;
+                    setTimeout(nextTurn, 1000);
+                }
+            }
+        }
+
+        function shakeScreen() {
+            container.style.animation = 'shake 0.5s';
+            setTimeout(() => container.style.animation = '', 500);
+        }
+
+        function checkGameOver() {
+            if (players[0].health <= 0 || players[1].health <= 0) {
+                gameActive = false;
+                const winner = players[0].health > 0 ? "Người chơi 1" : "Người chơi 2";
+                setTimeout(() => {
+                    alert(winner + " CHIẾN THẮNG!");
+                    location.reload();
+                }, 500);
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Ground
+            ctx.fillStyle = "#d4a373";
+            ctx.fillRect(0, 450, canvas.width, 150);
+
+            // Draw Wall in center
+            ctx.fillStyle = "#faedcd";
+            ctx.fillRect(480, 350, 40, 100);
+            ctx.strokeStyle = "#d4a373";
+            ctx.strokeRect(480, 350, 40, 100);
+
+            // Draw Players
+            players.forEach(p => {
+                ctx.font = "50px Arial";
+                ctx.fillText(p.img, p.x, p.y + 40);
+
+                // Draw name tag
+                ctx.font = "bol d 14px 'Plus Jakarta Sans'";
+                ctx.fillStyle = p.color;
+                ctx.textAlign = "center";
+                ctx.fillText(p.id === 1 ? "P1" : (gameMode === 'pvc' ? "CPU" : "P2"), p.x + 25, p.y - 10);
+            });
+
+            // Draw Stone
+            if (stone) {
+                ctx.beginPath();
+                ctx.arc(stone.x, stone.y, 8, 0, Math.PI * 2);
+                ctx.fillStyle = "#4a4e69";
+                ctx.fill();
+
+                // Trail
+                ctx.beginPath();
+                ctx.arc(stone.x, stone.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(255,255,255,0.5)";
+                ctx.fill();
+            }
+        }
+
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
+</body>
+
+</html>
